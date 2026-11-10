@@ -1,0 +1,10 @@
+check50:
+  checks: __init__.py
+  files:
+    - !exclude "*"
+    - !require "recap.py"
+
+submit50:
+  files:
+    - !exclude "*"
+    - !require "recap.py"
