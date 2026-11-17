@@ -81,16 +81,35 @@ Every new run starts fresh. **Replay** repeats the previous run; it does not rer
 
 If the browser cannot connect, ask your teacher to check the running terminal and forwarded port. Running `python mission.py` alone does not start the visual player.
 
-## 5. Check and turn in
+## 5. Check with check50
 
-Open a second terminal, enter the `crystal_courier` folder, and run:
+Save `mission.py`. Open a second terminal and enter the folder containing it. Leave the game running in the first terminal.
 
 ```bash
-python play.py --check challenge
-python play.py --check remix
+check50 MrDiaz-cpu/class_work/main/crystal_courier
 ```
 
-Each should print **Delivery complete!** The original server can stay open in the first terminal. Submit `mission.py` and your exit ticket through the system your teacher specifies. A completion screen is evidence that the route worked; your teacher will also review your code and explanation.
+Read the first red check. Fix your Python, save, and run check50 again. The checks test your functions and both levels. For `walk(direction, 0)`, no movement or collection should occur. A passing checker does not replace explaining your loops and decisions.
+
+## 6. Turn in with submit50
+
+Run this from the same folder:
+
+```bash
+submit50 MrDiaz-cpu/class_work/main/crystal_courier
+```
+
+Use your own CS50/GitHub sign-in if prompted. Review the files: **only `mission.py` should be listed**. Confirm and keep the returned submission link. Submit your current work before the deadline, even if some checks fail. Tell your teacher if sign-in prevents submission.
+
+`check50` checks your work. `submit50` turns it in. Turn in the exit ticket separately as your teacher directs.
+
+If online check50 is unavailable, try:
+
+```bash
+check50 --local MrDiaz-cpu/class_work/main/crystal_courier
+```
+
+This runs the GitHub checks in your codespace; it does not submit your work. If you already downloaded the game, you can use these commands immediately without downloading again or overwriting your saved Python.
 
 ## Hints — use one at a time
 

@@ -41,19 +41,46 @@ Edit Python in cs50.dev, save, then click **Run saved Python** in the game tab. 
 
 Student work uses functions, arguments, loops, and conditionals. The import line, Python engine, and browser graphics are supplied. No package installation is needed (Python 3.9+ and a modern browser).
 
-## Check your work
+## Check with check50
 
-In a second terminal, inside the same project folder:
+Save `mission.py`. Open a **second terminal** in the `crystal_courier` folder, leaving the game running in the first terminal:
+
+```bash
+check50 MrDiaz-cpu/class_work/main/crystal_courier
+```
+
+The 12 checks cover Python syntax, the `walk` and `main` functions, all four directions, the number of steps (including zero), collection after every step, repeated calls, and completing Challenge and Remix. Only `mission.py` is sent; the checker supplies its own game engine. Read the first red check, fix the code, save, and run check50 again. The unfinished starter is expected to fail behavior checks.
+
+## Submit with submit50
+
+From the same folder:
+
+```bash
+submit50 MrDiaz-cpu/class_work/main/crystal_courier
+```
+
+Sign in with **your own** CS50/GitHub account if prompted. Review the file list: it should contain **only `mission.py`**. Confirm the submission and keep the returned confirmation link. `check50` checks your work; `submit50` turns it in. Submit your current work before the deadline even if some checks still fail.
+
+If you downloaded the game earlier, you do not need to download it again: both commands fetch the configuration from GitHub. Do not overwrite your completed `mission.py` with the starter.
+
+### Troubleshooting
+
+- **mission.py missing:** use `ls` and `pwd`; change into the folder containing your saved `mission.py`.
+- **Login problem:** follow the tool's sign-in instructions using your own account. Tell your teacher if you cannot complete sign-in before the deadline.
+- **Online check50 unavailable:** try `check50 --local MrDiaz-cpu/class_work/main/crystal_courier`. This still downloads the checks from GitHub but runs them in your codespace. It does not submit your work.
+- **command not found:** use the cs50.dev terminal. On another Python environment, install with `python -m pip install check50 submit50`.
+
+The game's quick completion checks are also available:
 
 ```bash
 python play.py --check challenge
 python play.py --check remix
 ```
 
-Both should report **Delivery complete!** Submit `mission.py` and the exit ticket through the system your teacher specifies. No hosted check50/submit50 slug is configured for this lesson.
+Your teacher reviews the use of loops and your explanations separately from these behavior checks.
 
 ## Validation
 
-Python game tests and browserless playback-controller checks passed. Full browser layout and the signed-in cs50.dev workflow still need a check on a school device. The preview is a render from the canvas code, not a full browser screenshot.
+Python game tests and browserless playback-controller checks passed. The 12 check50 checks accept three correct implementations and reject thirteen broken implementations. The submit50 file-selection configuration was verified to collect only mission.py; final submission requires the student’s own authenticated account. Full browser layout and the signed-in cs50.dev workflow still need a check on a school device. The preview is a render from the canvas code, not a full browser screenshot.
 
 Original classroom extension; not an official CS50 problem set.
