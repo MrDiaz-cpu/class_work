@@ -1,0 +1,36 @@
+:root{--ink:#193a2e;--green:#246045;--paper:#fbf6e8;--white:#fffcf4;--edge:#5c705e;--accent:#f4c750;--pale:#e7efda;--dark:#203b32}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.45 "Atkinson Hyperlegible Next",system-ui,sans-serif}
+header{background:var(--ink);color:white;border-bottom:4px solid var(--accent)}
+.mast,main{max-width:1248px;margin:auto;padding:0 clamp(16px,4vw,60px)}
+.mast{min-height:62px;display:flex;align-items:center;justify-content:space-between;font-weight:650}
+.brand{display:flex;align-items:center;gap:.6rem;color:white;text-decoration:none;font: bold 26px/1 Georgia,serif}
+.leaf{width:35px;height:35px;border-radius:9px;display:grid;place-items:center;background:var(--accent);color:var(--ink);font-size:30px}
+.mast b{color:var(--accent);margin:0 .4rem}.intro{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:30px 0 22px}
+.kicker{font:bold 13px/1.2 ui-monospace,monospace;letter-spacing:.15em;margin:0 0 6px;color:var(--green)}
+h1{font:700 clamp(38px,5vw,59px)/1.05 Georgia,serif;letter-spacing:-.04em;margin:0}
+#goal{margin:7px 0 0}#badge{border:1.5px solid var(--green);border-radius:22px;padding:6px 13px;background:var(--pale);font-size:16px;font-weight:650}#badge.connected::before{content:"● ";color:var(--green)}
+.farm-card,.panel{border:2px solid var(--ink);border-radius:12px;overflow:hidden;background:var(--white)}
+.toolbar,.controls,.hud,.bag,.panel-head{display:flex;align-items:center;gap:12px;padding:12px 18px;flex-wrap:wrap}
+.toolbar,.panel-head,.controls{background:var(--white)}label{display:flex;align-items:center;gap:8px;font-weight:650}
+select,button{font:inherit;color:var(--ink);border:1.5px solid var(--edge);border-radius:7px;padding:7px 12px;background:white;min-height:40px}
+button{cursor:pointer;font-weight:650}button:enabled:hover{background:var(--pale)}button:disabled,select:disabled{color:#4b584c;background:#f1efe4;opacity:1;cursor:default}
+button.primary{background:var(--green);color:white;border-color:var(--ink);margin-left:auto;padding-inline:21px}
+button.primary:enabled:hover{background:var(--ink)}:focus-visible{outline:3px solid #a64700;outline-offset:2px}
+.hud{background:var(--dark);color:#fffdf1;min-height:48px;padding-block:6px;gap:22px;font-size:17px}
+#score,.stat{display:inline-flex;align-items:center;gap:6px}#score{margin-left:auto}
+#stars{color:#ffe185;font-size:22px;letter-spacing:.08em}.bag{background:var(--pale);border-bottom:1px solid var(--edge);gap:16px}.bag .waste{margin-left:auto}
+.controls{border-top:1px solid var(--edge)}.controls label{margin-left:auto}
+.scrollscene{overflow:auto;background:#dcf1df}#scene{display:block;width:100%;height:278px}
+.pixel-art canvas{image-rendering:pixelated}
+#result{padding:13px 20px;background:#fff0bb;color:var(--ink);border-top:1px solid var(--edge);font-size:18px;font-weight:650}
+.notebooks{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0 40px}.panel{min-width:0}
+h2{font:bold 23px Georgia,serif;letter-spacing:-.02em;margin:0}.panel-head{justify-content:space-between;min-height:48px;border-bottom:1px solid var(--edge)}
+.panel-head code,.panel-head span{font:600 14px/1.4 ui-monospace,monospace}.prints-title{border-top:1px solid var(--edge)}
+#source{height:330px;overflow:auto;background:#18382d;color:#fff9dc;font:15px/1.6 ui-monospace,monospace;padding:10px 0}
+.line{display:flex;white-space:pre;min-width:max-content;padding-right:10px}.line b{display:inline-block;width:3em;text-align:right;padding-right:1em;user-select:none;color:#d0eabd}
+.line.active,.line.active b{background:#ffe18b;color:#172d20}.line.active{box-shadow:inset 4px 0 #a45200}
+#log{height:193px;overflow:auto;list-style:none;padding:4px 16px;margin:0}#log li{border-bottom:1px solid #b9c5af;padding:5px 0}
+#prints{margin:0;padding:10px 16px;max-height:160px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px}
+[hidden]{display:none!important}@media(max-width:720px){.intro{align-items:flex-start;flex-direction:column}.toolbar,.controls,.hud,.bag{padding:10px;gap:8px}.notebooks{grid-template-columns:1fr}button.primary{margin-left:0}.intro{margin-top:20px}.controls label{margin-left:0}#badge{font-size:16px}}
+

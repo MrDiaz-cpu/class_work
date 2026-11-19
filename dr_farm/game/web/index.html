@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#183b30"><title>Dr. Farm · Python field lab</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><div class="mast"><a href="./" class="brand"><span aria-hidden="true" class="leaf">❧</span> Dr. Farm</a><span>CS50P <b> / </b> Week 2</span></div></header>
+<main>
+  <div class="intro"><div><p class="kicker">PYTHON FIELD LAB</p><h1 id="title">Tutorial</h1>
+    <p id="goal">Care for one radish over ten days.</p></div><span id="badge" role="status">Connecting…</span></div>
+  <section class="farm-card" aria-label="Farm and playback">
+    <div class="toolbar"><label>Level <select id="level"><option value="0">Tutorial</option><option value="1">Level 1 · Harvest</option><option value="2">Level 2 · Plant</option><option value="3">Level 3 · Timing</option></select></label>
+    <label>Field <select id="field"><option value="challenge">Challenge</option><option value="remix">Remix</option></select></label>
+    <button id="run" class="primary" disabled>▶ &nbsp; Run saved Python</button></div>
+    <div class="hud"><strong id="day"></strong><span id="left"></span><strong id="score"></strong><span id="stars" aria-label="Stars"></span></div>
+    <div class="scrollscene"><canvas id="scene" aria-label="Farm field"></canvas></div>
+    <div id="bag" class="bag" hidden></div>
+    <div class="controls"><button id="replay" disabled>↺ &nbsp;Replay</button><button id="pause" disabled>Pause</button><button id="next" disabled>Next action →</button>
+      <label>Speed <select id="speed"><option value="2">½×</option><option value="1" selected>1×</option><option value=".5">2×</option><option value=".2">5×</option></select></label></div>
+    <div id="result" role="status" hidden></div>
+  </section>
+  <section class="notebooks">
+    <div class="panel"><div class="panel-head"><h2>Saved Python</h2><code id="filename">tutorial.py</code></div>
+    <div id="source" tabindex="0" aria-label="Saved source with current line"></div></div>
+    <div class="panel"><div class="panel-head"><h2>Action log</h2><span id="count">0 actions</span></div>
+    <ol id="log" tabindex="0"></ol><div class="panel-head prints-title"><h2>Your prints</h2></div>
+    <pre id="prints" tabindex="0">Run your code to see its print output.</pre></div>
+  </section>
+</main><script type="module" src="app.js"></script>
+</body></html>
+
