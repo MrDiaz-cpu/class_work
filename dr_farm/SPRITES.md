@@ -17,7 +17,7 @@ Align the farmer’s feet in the same place in each square. The game scales ever
 
 Transparent PNGs retain their alpha channel. For an opaque sprite, use a solid background, preferably `#FF00FF`. The loader samples the corners and removes matching pixels with a tolerance. Full-bleed grass and soil keep their natural backgrounds. Missing images get labeled placeholders. To change smooth scaling to sharp pixels, set `PIXEL_ART` to `true` in `game/web/sprites.js`.
 
-This edition includes 31 supplied images. The second walk frame, harvest pose, radish item and four seed packets use placeholders until matching PNGs are added. The supplied art was resized for the web. The growing and ready stages share the same pip scale even when their drawings differ in size.
+This edition includes 33 supplied images. The second walk frame and four seed packets use placeholders until matching PNGs are added. The supplied art was resized for the web. The growing and ready stages share the same pip scale even when their drawings differ in size.
 
 From the repository’s `dr_farm/` directory:
 
