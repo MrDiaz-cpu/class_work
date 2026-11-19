@@ -1,0 +1,11 @@
+check50:
+  checks: __init__.py
+  files:
+    - !exclude "*"
+    - !require "level2.py"
+
+submit50:
+  files:
+    - !exclude "*"
+    - !require "level2.py"
+
