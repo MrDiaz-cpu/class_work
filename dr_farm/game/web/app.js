@@ -1,12 +1,12 @@
 import {loadSprites, icon} from "./sprites.js";
-import {draw} from "./scene.js";
+import {draw, isHarvest, rewardAt} from "./scene.js";
 
 const $ = id => document.getElementById(id);
 const titles=["Tutorial","Level 1 · Harvest","Level 2 · Plant","Level 3 · Timing"];
 const goals=["Care for one radish over ten days.","Fill your basket. Visit every plot each day.",
   "Grow crops for coins. Choose which seeds to try first.","Earn coins and finish with zero wasted seeds."];
 let catalog, run, frames=[], index=0, progress=1, playing=false, tick=0, raf=0, revision=0, from=0;
-let busy=false, connected=false;
+let busy=false, connected=false, hudState;
 const selected=()=>Number($("level").value);
 const key=()=>selected()+"/"+$("field").value;
 const speed=()=>Number($("speed").value);
@@ -22,14 +22,20 @@ function controls() {
 function stop() {playing=false; cancelAnimationFrame(raf);controls();}
 function render() {
   if(!frames.length)return;
-  draw(frames[index],frames[index-1],progress,{grow:catalog.grow,level:selected(),from,won:!!run?.stars});
+  const frame=frames[index], previous=frames[index-1];
+  const visible = isHarvest(frame) && progress < rewardAt && previous ? previous.state : frame.state;
+  if (visible !== hudState) {
+    hudState = visible;
+    hud(visible);
+  }
+  draw(frame,previous,progress,{grow:catalog.grow,level:selected(),from,won:!!run?.stars});
 }
 function badge(ok) {
   connected=ok;$("badge").textContent=ok?"Connected · your Python":"Disconnected";
   $("badge").classList.toggle("connected",ok);controls();
 }
-function hud() {
-  const s=frames[index].state, setting=catalog.fields[key()];
+function hud(s) {
+  const setting=catalog.fields[key()];
   $("day").textContent="Day "+s.day+" of 10";
   $("left").hidden=selected()!==3;$("left").textContent=s.days_left+" days left";
   const score=selected()<2?s.basket:s.coins;
@@ -76,11 +82,13 @@ function advance() {
   index++;progress=0;const e=frames[index];
   const li=document.createElement("li");li.textContent=describe(e);$("log").append(li);
   $("log").scrollTop=$("log").scrollHeight;$("count").textContent=index+" actions";
-  highlight(e.line);hud();render();controls();
+  highlight(e.line);render();controls();
 }
 function animate(now) {
   if(!playing)return;
-  const ms=(frames[index].action==="sleep"?950:680)*speed();
+  const frame=frames[index];
+  const duration=isHarvest(frame) ? 1350 : frame.action==="sleep" ? 950 : 680;
+  const ms=duration*speed();
   progress=Math.min(1,progress+(now-tick)/ms);tick=now;render();
   if(progress===1){if(index===frames.length-1){finish();return;}advance();}
   raf=requestAnimationFrame(animate);
@@ -88,7 +96,7 @@ function animate(now) {
 function play(){if(!run)return;playing=true;tick=performance.now();controls();raf=requestAnimationFrame(animate);}
 function resetTimeline(){
   stop();index=from=0;progress=1;$("log").replaceChildren();$("count").textContent="0 actions";
-  $("result").hidden=true;highlight(null);hud();render();controls();
+  $("result").hidden=true;highlight(null);render();controls();
 }
 function choose(){
   revision++;busy=false;stop();run=null;

@@ -3,6 +3,85 @@ import {sprite} from "./sprites.js";
 const canvas = document.querySelector("#scene");
 const ctx = canvas.getContext("2d");
 const H = 278;
+const soilTop = 151;
+const ground = soilTop + 28;
+const gripAt = .32;
+const pullAt = .47;
+const freeAt = .69;
+const throwAt = .77;
+export const rewardAt = .96;
+
+function ease(p, start, end) {
+  const t = Math.max(0, Math.min(1, (p - start) / (end - start)));
+  return t * t * (3 - 2 * t);
+}
+
+export function isHarvest(frame) {
+  return frame.action === "harvest" && frame.ok && frame.plot != null;
+}
+
+// Hold one boot against the bed. The produce follows the same transform as
+// the hands until release, so it cannot drift away when the farmer leans back.
+function drawHarvest(crop, x, width, level, progress) {
+  const pull = ease(progress, pullAt, freeAt);
+  const crouch = ease(progress, gripAt, pullAt) * (1 - pull);
+  const flight = ease(progress, throwAt, rewardAt);
+  const recover = ease(progress, throwAt, 1);
+  const picked = ease(progress, freeAt - .035, freeAt);
+  const tilt = -.58 * pull;
+  const stretch = 1 - .20 * crouch;
+  const size = 108;
+  const footX = x - 42, footY = ground + 2;
+  const reach = 42, rise = -27 * stretch;
+  const handX = footX + reach * Math.cos(tilt) - rise * Math.sin(tilt);
+  const handY = footY + reach * Math.sin(tilt) + rise * Math.cos(tilt);
+  const endX = Math.min(x + 76, width - 26), endY = ground - 14;
+  const itemSize = 52 - 21 * flight;
+  const itemX = handX + (endX - handX) * flight;
+  const itemY = handY + (endY - handY) * flight - 42 * Math.sin(Math.PI * flight);
+  const sold = level >= 2;
+  if (!sold) sprite(ctx, "basket", endX - 23, endY - 17, 46);
+
+  // The root starts partially buried. Drawing only above the soil line
+  // reveals it naturally as the hands pull it out.
+  ctx.save();
+  ctx.beginPath(); ctx.rect(0, 0, width, ground - 7); ctx.clip();
+  if (progress < freeAt) {
+    ctx.globalAlpha = 1 - picked;
+    const lift = pull > 0 ? handY - (footY - 27 * .8) : 0;
+    sprite(ctx, crop + "_ready", handX - 37, ground - 74 + lift, 74);
+  }
+  ctx.globalAlpha = picked * (sold ? 1 - ease(progress, throwAt, throwAt + .06) : 1);
+  if (ctx.globalAlpha > 0 && flight < 1)
+    sprite(ctx, crop + "_item", itemX - itemSize / 2, itemY - .40 * itemSize, itemSize);
+  ctx.restore();
+
+  if (recover < .72) {
+    ctx.save();
+    ctx.translate(footX + 30 * recover, footY - 35 * recover);
+    ctx.rotate(tilt * (1 - recover));
+    const scale = 1 - .16 * recover;
+    ctx.scale(scale, stretch * scale);
+    sprite(ctx, "farmer_harvest", -.31 * size, -.94 * size, size);
+    ctx.restore();
+  } else {
+    sprite(ctx, "farmer_idle", x - 45 - 30 * (1 - recover), 58 + 35 * (1 - recover), 90);
+  }
+
+  if (pull > 0 && pull < 1) {
+    ctx.fillStyle = "#5e3d2d";
+    for (const offset of [-11, 8, 15]) {
+      ctx.fillRect(x + offset * pull, ground - 9 * Math.sin(Math.PI * pull), 3, 3);
+    }
+  }
+  if (sold && progress > throwAt && flight < 1) {
+    ctx.save();
+    ctx.globalAlpha = ease(progress, throwAt, throwAt + .06);
+    sprite(ctx, "coin", itemX - 15, itemY - 15, 30);
+    ctx.restore();
+  }
+}
+
 function box(x,y,w,h,fill,stroke,r=8) {
   ctx.beginPath(); ctx.roundRect(x,y,w,h,r); ctx.fillStyle=fill; ctx.fill();
   if (stroke) {ctx.strokeStyle=stroke; ctx.lineWidth=2; ctx.stroke();}
@@ -47,12 +126,15 @@ export function draw(frame, previous, progress, context) {
   const span=Math.min(W-30,Math.max(n*124,270));
   const spacing=span/n, pos=i=>(W-span)/2+spacing*(i+.5);
   const tile=Math.min(spacing-10,88);
-  plots.forEach((p,i)=>{
-    const x=pos(i), top=151, t=p.crop==="empty"?0:grow[p.crop], ready=t && p.stage===t;
+  const harvesting = isHarvest(frame);
+  plots.forEach((after,i)=>{
+    const active = harvesting && i === frame.plot;
+    const p = active && progress < freeAt && previous ? previous.state.plots[i] : after;
+    const x=pos(i), top=soilTop, t=p.crop==="empty"?0:grow[p.crop], ready=t && p.stage===t;
     ctx.save();ctx.beginPath();ctx.roundRect(x-tile/2,top,tile,49,6);ctx.clip();
     sprite(ctx,p.wet?"soil_wet":"soil_dry",x-tile/2,top,tile);
     ctx.restore();ctx.beginPath();ctx.roundRect(x-tile/2,top,tile,49,6);ctx.lineWidth=2;ctx.strokeStyle="#223c2a";ctx.stroke();
-    if(t){
+    if(t && !(active && progress >= gripAt && progress < freeAt)){
       const deceased=level===3 && state.finished && p.wasted;
       const kind=ready?"ready":p.stage?"growing":"seed", size=kind==="seed"?34:kind==="ready"?74:54;
       sprite(ctx,deceased?"withered":p.crop+"_"+kind,x-size/2,top+28-size,size);
@@ -67,23 +149,27 @@ export function draw(frame, previous, progress, context) {
     } else label("open",x,246,14);
   });
   const idx=frame.plot==null ? from : frame.plot;
-  const walking=frame.plot!=null && idx!==from && progress<.4;
-  const fraction=walking?Math.min(1,progress/.4):1;
+  const arrival = harvesting ? gripAt : .4;
+  const walking=frame.plot!=null && idx!==from && progress<arrival;
+  const fraction=walking?Math.min(1,progress/arrival):1;
   const x=pos(from)+(pos(idx)-pos(from))*fraction;
   let pose="idle";
   if(state.finished)pose=won?"cheer":"sad";
   else if(walking)pose=progress<.2?"walk_1":"walk_2";
   else if(frame.plot!=null)pose=frame.ok?frame.action:"sad";
-  sprite(ctx,"farmer_"+pose,x-45,58,90);
+  if (harvesting && progress >= gripAt && progress < 1) {
+    drawHarvest(frame.crop, pos(idx), W, level, progress);
+  } else if (harvesting && progress < gripAt) {
+    const approach = ease(progress, 0, gripAt);
+    const walkPose = idx === from ? "idle" : progress < gripAt / 2 ? "walk_1" : "idle";
+    sprite(ctx, "farmer_" + walkPose, x - 45 - 25 * approach, 58 + 24 * approach, 90);
+  } else {
+    sprite(ctx, "farmer_"+(harvesting ? "idle" : pose),x-45,58,90);
+  }
   if(frame.ok && frame.plot!=null && progress>=.4 && progress<1) {
     const t=(progress-.4)/.6;
     if(frame.action==="water")sprite(ctx,"water_splash",x+12,136+8*t,34);
     if(frame.action==="plant")sprite(ctx,"packet_"+frame.crop,x-14,116+40*t,32,"seed");
-    if(frame.action==="harvest"){
-      const end=W-45;
-      sprite(ctx,level<2?frame.crop+"_item":"coin",x+(end-x)*t-15,145-90*Math.sin(t*2),31);
-      if(level<2)sprite(ctx,"basket",end-24,40,48);
-    }
   }
   if(frame.message && progress>=.4){
     ctx.font="bold 16px system-ui";

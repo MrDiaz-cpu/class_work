@@ -13,7 +13,7 @@ Use square PNG files. Put the files in `dr_farm/game/web/sprites/`. The browser 
 | Seed packets | `packet_radish`, `packet_carrot`, `packet_corn`, `packet_pumpkin` |
 | Other | `withered`, `basket`, `coin`, `water_splash`, `star`, `sun`, `moon` |
 
-Align the farmer’s feet in the same place in each square. The game scales every frame around the same anchor. Crops sit on top of soil. Stage zero uses the seed image. Middle stages share the growing image. Full pips select the ready image. The item image represents picked produce.
+Align the farmer’s feet in the same place in each square. The game scales every frame around the same anchor. Crops sit on top of soil. Stage zero uses the seed image. Middle stages share the growing image. Full pips select the ready image. The item image represents picked produce. During a harvest the game holds one boot against the bed and lines up the crop with the farmer’s hands. The supplied harvest drawing includes its own root and mound. The `harvestActor` outline in `game/web/sprites.js` isolates the farmer for playback. If you replace that drawing with an empty-handed pose, set the outline to `null`. Place the hands about 70% across and 69% down the square.
 
 Transparent PNGs retain their alpha channel. For an opaque sprite, use a solid background, preferably `#FF00FF`. The loader samples the corners and removes matching pixels with a tolerance. Full-bleed grass and soil keep their natural backgrounds. Missing images get labeled placeholders. To change smooth scaling to sharp pixels, set `PIXEL_ART` to `true` in `game/web/sprites.js`.
 
