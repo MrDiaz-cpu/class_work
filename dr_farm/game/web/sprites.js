@@ -9,6 +9,16 @@ export const manifest = [
   "withered", "basket", "coin", "water_splash", "star", "sun", "moon"
 ];
 const images = new Map();
+
+// The supplied 256-unit harvest illustration contains a turnip and a mound.
+// Isolate its farmer and fingers so each plot can supply the crop being pulled.
+// For replacement art with empty hands, set this outline to null.
+const harvestActor = new Path2D(
+  "M0 0 H166 V146 L171 154 L174 164 L180 173 L179 182 L169 190 " +
+  "L158 187 L150 182 L146 184 L151 191 L153 203 L164 209 L164 216 " +
+  "L175 225 L175 235 L162 248 H0 Z M182 171 L187 165 L196 162 " +
+  "L197 169 L193 180 L190 185 L183 183 Z"
+);
 const tileNames = new Set(["soil_dry", "soil_wet", "grass"]);
 document.documentElement.classList.toggle("pixel-art", PIXEL_ART);
 
@@ -47,7 +57,15 @@ export async function loadSprites(available) {
       const ctx = c.getContext("2d", {willReadFrequently: true});
       ctx.imageSmoothingEnabled = !PIXEL_ART;
       ctx.drawImage(img, 0, 0, c.width, c.height);
-      images.set(name, keyBackground(c, name));
+      keyBackground(c, name);
+      if (name === "farmer_harvest" && harvestActor) {
+        ctx.save();
+        ctx.scale(c.width / 256, c.height / 256);
+        ctx.globalCompositeOperation = "destination-in";
+        ctx.fill(harvestActor);
+        ctx.restore();
+      }
+      images.set(name, c);
     } catch { /* A missing or unreadable image gets the labeled tile below. */ }
   }));
 }
