@@ -6,6 +6,8 @@ const titles=["Tutorial","Level 1 · Harvest","Level 2 · Plant","Level 3 · Tim
 const goals=["Care for one radish over ten days.","Fill your basket. Visit every plot each day.",
   "Grow crops for coins. Choose which seeds to try first.","Earn coins and finish with zero wasted seeds."];
 let catalog, run, frames=[], index=0, progress=1, playing=false, tick=0, raf=0, revision=0, from=0;
+const msPerPlot = 820;
+let walkMs=0, actionMs=680;
 let busy=false, connected=false, hudState;
 const selected=()=>Number($("level").value);
 const key=()=>selected()+"/"+$("field").value;
@@ -23,12 +25,16 @@ function stop() {playing=false; cancelAnimationFrame(raf);controls();}
 function render() {
   if(!frames.length)return;
   const frame=frames[index], previous=frames[index-1];
-  const visible = isHarvest(frame) && progress < rewardAt && previous ? previous.state : frame.state;
+  const elapsed=progress*(walkMs+actionMs);
+  const walkFraction=walkMs ? Math.min(1, elapsed/walkMs) : 1;
+  const actionProgress=Math.max(0, (elapsed-walkMs)/actionMs);
+  const visible = previous && (walkFraction < 1 || isHarvest(frame) && actionProgress < rewardAt)
+    ? previous.state : frame.state;
   if (visible !== hudState) {
     hudState = visible;
     hud(visible);
   }
-  draw(frame,previous,progress,{grow:catalog.grow,level:selected(),from,won:!!run?.stars});
+  draw(frame,previous,actionProgress,{grow:catalog.grow,level:selected(),from,won:!!run?.stars,walkFraction});
 }
 function badge(ok) {
   connected=ok;$("badge").textContent=ok?"Connected · your Python":"Disconnected";
@@ -80,22 +86,22 @@ function advance() {
   if(index>=frames.length-1){progress=1;render();finish();return;}
   if(frames[index].plot!=null)from=frames[index].plot;
   index++;progress=0;const e=frames[index];
+  walkMs=e.plot==null ? 0 : Math.abs(e.plot-from)*msPerPlot;
+  actionMs=isHarvest(e) ? 1350 : e.action==="sleep" ? 950 : 680;
   const li=document.createElement("li");li.textContent=describe(e);$("log").append(li);
   $("log").scrollTop=$("log").scrollHeight;$("count").textContent=index+" actions";
   highlight(e.line);render();controls();
 }
 function animate(now) {
   if(!playing)return;
-  const frame=frames[index];
-  const duration=isHarvest(frame) ? 1350 : frame.action==="sleep" ? 950 : 680;
-  const ms=duration*speed();
+  const ms=(walkMs+actionMs)*speed();
   progress=Math.min(1,progress+(now-tick)/ms);tick=now;render();
   if(progress===1){if(index===frames.length-1){finish();return;}advance();}
   raf=requestAnimationFrame(animate);
 }
 function play(){if(!run)return;playing=true;tick=performance.now();controls();raf=requestAnimationFrame(animate);}
 function resetTimeline(){
-  stop();index=from=0;progress=1;$("log").replaceChildren();$("count").textContent="0 actions";
+  stop();index=from=walkMs=0;progress=1;$("log").replaceChildren();$("count").textContent="0 actions";
   $("result").hidden=true;highlight(null);render();controls();
 }
 function choose(){

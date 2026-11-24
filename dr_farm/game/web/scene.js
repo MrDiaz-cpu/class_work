@@ -1,4 +1,4 @@
-import {sprite} from "./sprites.js";
+import {sprite, walkFrames} from "./sprites.js";
 
 const canvas = document.querySelector("#scene");
 const ctx = canvas.getContext("2d");
@@ -18,6 +18,17 @@ function ease(p, start, end) {
 
 export function isHarvest(frame) {
   return frame.action === "harvest" && frame.ok && frame.plot != null;
+}
+
+// The extended boots mark opposite footfalls. The three similar knee lifts
+// pass quickly so the advancing foot doesn't hang in the air.
+const walkPoseEnds = [.10, .21, .34, .40, .46, .50, .72, 1];
+function drawWalk(start, end, fraction) {
+  const distance = end - start;
+  const steps = Math.max(1, Math.round(Math.abs(distance) / 38));
+  const phase = (.055 + fraction * steps / 2) % 1;
+  const pose = walkFrames[walkPoseEnds.findIndex(limit => phase < limit)];
+  sprite(ctx, pose, start + distance * fraction - 45, 58, 90, "walk", distance < 0);
 }
 
 // Hold one boot against the bed. The produce follows the same transform as
@@ -98,9 +109,10 @@ function cloud(x,y) {
   ctx.fillRect(x-7,y,48,8);
 }
 export function draw(frame, previous, progress, context) {
-  const {grow,level,from,won}=context;
+  const {grow,level,from,won,walkFraction=1}=context;
+  const walking=walkFraction<1;
   const sleep=frame.action==="sleep";
-  const state=sleep && progress<.5 && previous ? previous.state : frame.state;
+  const state=previous && (walking || sleep && progress<.5) ? previous.state : frame.state;
   const plots=state.plots, n=plots.length;
   const W=Math.max(canvas.parentElement.clientWidth, n*104+32,350);
   const d=Math.min(devicePixelRatio||1,2);
@@ -128,7 +140,7 @@ export function draw(frame, previous, progress, context) {
   const tile=Math.min(spacing-10,88);
   const harvesting = isHarvest(frame);
   plots.forEach((after,i)=>{
-    const active = harvesting && i === frame.plot;
+    const active = harvesting && !walking && i === frame.plot;
     const p = active && progress < freeAt && previous ? previous.state.plots[i] : after;
     const x=pos(i), top=soilTop, t=p.crop==="empty"?0:grow[p.crop], ready=t && p.stage===t;
     ctx.save();ctx.beginPath();ctx.roundRect(x-tile/2,top,tile,49,6);ctx.clip();
@@ -149,20 +161,19 @@ export function draw(frame, previous, progress, context) {
     } else label("open",x,246,14);
   });
   const idx=frame.plot==null ? from : frame.plot;
-  const arrival = harvesting ? gripAt : .4;
-  const walking=frame.plot!=null && idx!==from && progress<arrival;
-  const fraction=walking?Math.min(1,progress/arrival):1;
-  const x=pos(from)+(pos(idx)-pos(from))*fraction;
+  const x=pos(idx);
+  if (walking) {
+    drawWalk(pos(from), x, walkFraction);
+    return;
+  }
   let pose="idle";
   if(state.finished)pose=won?"cheer":"sad";
-  else if(walking)pose=progress<.2?"walk_1":"walk_2";
   else if(frame.plot!=null)pose=frame.ok?frame.action:"sad";
   if (harvesting && progress >= gripAt && progress < 1) {
     drawHarvest(frame.crop, pos(idx), W, level, progress);
   } else if (harvesting && progress < gripAt) {
     const approach = ease(progress, 0, gripAt);
-    const walkPose = idx === from ? "idle" : progress < gripAt / 2 ? "walk_1" : "idle";
-    sprite(ctx, "farmer_" + walkPose, x - 45 - 25 * approach, 58 + 24 * approach, 90);
+    sprite(ctx, "farmer_idle", x - 45 - 25 * approach, 58 + 24 * approach, 90);
   } else {
     sprite(ctx, "farmer_"+(harvesting ? "idle" : pose),x-45,58,90);
   }
