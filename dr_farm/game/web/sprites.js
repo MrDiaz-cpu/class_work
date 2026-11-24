@@ -1,8 +1,9 @@
 // Change this one setting for crisp pixels when a square is enlarged.
 export const PIXEL_ART = false;
 const crops = ["radish", "carrot", "corn", "pumpkin"];
+export const walkFrames = Array.from({length: 8}, (_, i) => "farmer_walk_" + (i + 1));
 export const manifest = [
-  "farmer_idle", "farmer_walk_1", "farmer_walk_2", "farmer_water", "farmer_harvest",
+  "farmer_idle", ...walkFrames, "farmer_water", "farmer_harvest",
   "farmer_plant", "farmer_cheer", "farmer_sad", "soil_dry", "soil_wet", "grass",
   ...crops.flatMap(c => ["seed", "growing", "ready", "item"].map(s => c + "_" + s)),
   ...crops.map(c => "packet_" + c),
@@ -70,10 +71,16 @@ export async function loadSprites(available) {
   }));
 }
 
-export function sprite(ctx, name, x, y, size, label) {
+export function sprite(ctx, name, x, y, size, label, mirror = false) {
   ctx.imageSmoothingEnabled = !PIXEL_ART;
   if (images.has(name)) {
+    if (mirror) {
+      ctx.save();
+      ctx.translate(2 * x + size, 0);
+      ctx.scale(-1, 1);
+    }
     ctx.drawImage(images.get(name), x, y, size, size);
+    if (mirror) ctx.restore();
     return;
   }
   ctx.save();
